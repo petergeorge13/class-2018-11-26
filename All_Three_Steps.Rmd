@@ -1,0 +1,59 @@
+---
+title: "Maine Election"
+author: "Peter George"
+date: "November 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(devtools)
+library(tidyverse)
+library(knitr)
+library(readxl)
+library(janitor)
+library(dplyr)
+```
+Step 1
+```{r}
+
+x <- read_excel("Nov18CVRExportRaw-1.xlsx")
+y <- read_excel("Nov18CVRExportRaw-2.xlsx")
+z <- read_excel("Nov18CVRExportRaw-1.xlsx")
+
+xx <- bind_rows(x,y,z) 
+
+xx %>%
+  clean_names() %>%
+  rename(choice_1 = rep_to_congress_1st_choice_district_2) %>%
+  rename(choice_2 = rep_to_congress_2nd_choice_district_2) %>%
+  rename(choice_3 = rep_to_congress_3rd_choice_district_2) %>%
+  rename(choice_4 = rep_to_congress_4th_choice_district_2) %>%
+  rename(choice_5 = rep_to_congress_5th_choice_district_2) %>%
+  arrange(precinct) %>%
+  rename(vote = cast_vote_record) %>%
+  mutate(vote_id = row_number())
+  
+
+```
+
+Step 2
+```{r}
+
+a <- read_rds("tibble_1.rds")
+
+a %>%
+  select(vote_id, precinct, ballot_style, choice_1) %>%
+  fct_recode("Poliquin" ~ "REP Poliquin, Bruce (5931)")
+  
+```
+
+Step 3
+```{r}
+tibble_2 <- read_rds("tibble_2.rds")
+
+ggplot(data = tibble_2, aes(x = vote_id, y = cum_votes, color = candidate)) +
+  geom_line() +
+  theme(axis.title.x = element_blank()) +
+  labs(title = "Cumulative Voting in Maine's Second Congressional District", subtitle = "Representative Polquin Leads Democratic Challenger Golden in First Round", x = "", y = "Cumulative First Round Votes")
+```
